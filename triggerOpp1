@@ -1,0 +1,37 @@
+//Quando uma oportunidade com o valor acima de R$10.000,00 recebe fase de ganha, 
+//deverá ser criada uma tarefa para essa oportunidade informando que um time de 
+//profissionais deve ser designado para o local do reparo. 
+//Com data de encerramento da tarefa para 5 dias após a data de criação da tarefa. (Trigger)
+
+trigger OppCriada on Opportunity (after insert) {
+    if(trigger.isAfter && trigger.isInsert) {
+        for(Opportunity opportunity:trigger.new) {				//CUIDADO: Mude o nome do stagename de acordo com o nome da nossa org.
+            if(opportunity.Amount > 10000 && opportunity.StageName == 'Closed Won'){ 
+         		Task task = new Task (
+            		Subject = 'Um time de profissionais deve ser designado para o local do reparo',
+                	WhatID = opportunity.id,
+                    ActivityDate = System.Today().addDays(5)
+            	);
+            	Insert task;	       
+			}        
+        }
+    }	
+}
+
+
+////////////////////////////////////////////
+//Classe de teste////////////////////////////////////////////
+////////////////////////////////////////////
+
+@isTest
+public class testeOpp {
+    @isTest
+    public static void inserirTask() {
+        Opportunity opportunity = new Opportunity();
+        Opportunity.Name = 'Testando T';
+        Opportunity.Amount = 21323123;
+        Opportunity.StageName = 'Closed Won';
+        Opportunity.CloseDate = System.Today();
+        Insert Opportunity;
+    }
+}
